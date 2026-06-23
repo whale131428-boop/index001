@@ -1368,11 +1368,27 @@
         }
 
         let db;
-        try {
-            const fc = { apiKey: "AIzaSyCsd7QPRG5eNofLC-BR9GjH0V3XPkLk640", authDomain: "game-dinosaur.firebaseapp.com", projectId: "game-dinosaur", storageBucket: "game-dinosaur.firebasestorage.app", messagingSenderId: "488064752881", appId: "1:488064752881:web:669f6c9fe38244a2a29d50" };
-            firebase.initializeApp(fc); db = firebase.database(); useFirebase = true;
-        } catch (e) { useFirebase = false; }
 
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyCsd7QPRG5eNofLC-BR9GjH0V3XPkLk640",
+                authDomain: "game-dinosaur.firebaseapp.com",
+                databaseURL: "https://game-dinosaur-default-rtdb.firebaseio.com",
+                projectId: "game-dinosaur",
+                storageBucket: "game-dinosaur.firebasestorage.app",
+                messagingSenderId: "488064752881",
+                appId: "1:488064752881:web:669f6c9fe38244a2a29d50",
+                measurementId: "G-JPEKL6SK1Q"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            useFirebase = true;
+
+        } catch (e) {
+            console.error(e);
+            useFirebase = false;
+        }
         function connectRoom() {
             roomId = roomInput.value;
             if (!roomId) { alert("Please enter Room Code"); return; }
