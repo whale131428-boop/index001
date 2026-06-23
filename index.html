@@ -715,13 +715,26 @@
             box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
         }
 
-        /* Pixel palm tree obstacle */
-        .tree {
+        /* Obstacles */
+        .obstacle {
             position: absolute;
             z-index: 15;
             font-size: clamp(36px, 5.5vw, 60px);
             filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+        }
+
+        .obstacle.tree {
             bottom: 4px;
+        }
+
+        .obstacle.bird {
+            bottom: 70px;
+            animation: flap 0.4s infinite alternate;
+        }
+
+        @keyframes flap {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
         }
 
         /* Waiting overlay */
@@ -1531,11 +1544,13 @@
 
         function addScore() { score++; document.getElementById("score").innerHTML = score; }
 
-        let treeLoop;
+        let obsLoop;
         function spawnObstacle() {
-            treeLoop = setInterval(() => {
+            obsLoop = setInterval(() => {
                 if (!alive) return;
-                obstacles.push({ x: 1200, lane: Math.floor(Math.random() * 3) + 1, passed: false });
+                const types = ['tree', 'bird'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                obstacles.push({ x: 1200, lane: Math.floor(Math.random() * 3) + 1, passed: false, type: type });
             }, 1800);
         }
 
@@ -1545,18 +1560,26 @@
                 if (obstacles[i].x < 80 && !obstacles[i].passed) { obstacles[i].passed = true; addScore(); }
             }
             obstacles = obstacles.filter(x => x.x > -100);
-            renderTrees();
+            renderObstacles();
         }
 
-        function renderTrees() {
-            document.querySelectorAll(".tree").forEach(x => x.remove());
+        function renderObstacles() {
+            document.querySelectorAll(".obstacle").forEach(x => x.remove());
             obstacles.forEach(t => {
                 let d = document.createElement("div");
-                d.className = "tree";
-                if (t.lane === 1) d.classList.add("tree1");
-                if (t.lane === 2) d.classList.add("tree2");
-                if (t.lane === 3) d.classList.add("tree3");
-                d.innerHTML = "🌴"; d.style.left = t.x + "px";
+                d.className = "obstacle " + t.type;
+                if (t.lane === 1) d.classList.add("obs1");
+                if (t.lane === 2) d.classList.add("obs2");
+                if (t.lane === 3) d.classList.add("obs3");
+                
+                // Add correct emoji based on type
+                if (t.type === 'bird') {
+                    d.innerHTML = "🦅";
+                } else {
+                    d.innerHTML = "🌴";
+                }
+                
+                d.style.left = t.x + "px";
                 gameArea.appendChild(d);
             });
         }
@@ -1567,14 +1590,17 @@
             if (myAnimal === "bear") myLane = 3;
             for (let t of obstacles) {
                 if (t.lane !== myLane) continue;
-                if (t.x > 80 && t.x < 170 && playerY < 50) gameOver();
+                if (t.x > 80 && t.x < 170) {
+                    if (t.type === 'tree' && playerY < 50) gameOver();
+                    if (t.type === 'bird' && playerY >= 25) gameOver();
+                }
             }
         }
 
         function gameOver() {
             if (!alive) return;
             alive = false;
-            clearInterval(gameLoop); clearInterval(treeLoop); clearInterval(timeLoop);
+            clearInterval(gameLoop); clearInterval(obsLoop); clearInterval(timeLoop);
             renderPlayers(); updateMe();
             // Force immediate sync on death
             syncToFirebase();
