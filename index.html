@@ -7,7 +7,7 @@
     <title>🎮 Pixel Sea Runner</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323:wght@400&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -1382,19 +1382,46 @@
             };
 
             firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
+            db = firebase.firestore();
             useFirebase = true;
 
         } catch (e) {
             console.error(e);
             useFirebase = false;
         }
+        // Map animal to Firestore document name
+        function getPlayerDoc(animal) {
+            if (animal === 'dog') return 'Player 1';
+            if (animal === 'cat') return 'Player 2';
+            if (animal === 'bear') return 'Player 3';
+            return null;
+        }
+
         function connectRoom() {
             roomId = roomInput.value;
             if (!roomId) { alert("Please enter Room Code"); return; }
             if (useFirebase) {
-                db.ref("rooms/" + roomId).on("value", snap => { let d = snap.val(); if (d && d.players) { players = d.players; updateLobby(); } if (d && d.started) startGame(); });
-                db.ref("rooms/" + roomId + "/players").on("value", snap => { players = snap.val() || {}; renderPlayers(); updateLobby(); });
+                // Listen for game state (started flag)
+                db.collection("dinosaur").doc("gameState").onSnapshot(snap => {
+                    let d = snap.data();
+                    if (d && d.started) startGame();
+                });
+                // Listen for all player documents
+                db.collection("dinosaur").onSnapshot(snap => {
+                    players = {};
+                    snap.forEach(doc => {
+                        if (doc.id !== 'gameState') {
+                            players[doc.id] = doc.data();
+                        }
+                    });
+                    renderPlayers();
+                    updateLobby();
+                    // Auto-start when all 3 players are ready
+                    let arr = Object.values(players);
+                    if (arr.length >= 3 && arr.every(x => x.ready) && !gameStarted) {
+                        db.collection("dinosaur").doc("gameState").set({ started: true });
+                    }
+                });
             } else {
                 let sp = localStorage.getItem("game_players_" + roomId); players = sp ? JSON.parse(sp) : {}; updateLobby();
             }
@@ -1422,20 +1449,49 @@
             if (myAnimal === "dog") myName = dogName.value || "🐶 Player";
             if (myAnimal === "cat") myName = catName.value || "🐱 Player";
             if (myAnimal === "bear") myName = bearName.value || "🐻 Player";
+            myId = getPlayerDoc(myAnimal);
             let pd = { name: myName, animal: myAnimal, score: 0, time: 0, alive: true, ready: true, y: 0 };
-            if (useFirebase) db.ref("rooms/" + roomId + "/players/" + myId).set(pd);
+            if (useFirebase) db.collection("dinosaur").doc(myId).set(pd);
             else { players[myId] = pd; localStorage.setItem("game_players_" + roomId, JSON.stringify(players)); }
             changeScreen(3); updateLobby(); checkReady();
         };
 
         function checkReady() {
-            setTimeout(() => {
-                let arr = Object.values(players);
-                if (arr.length >= 3 && arr.every(x => x.ready)) startGame();
-            }, 500);
+            let arr = Object.values(players);
+            if (arr.length >= 3 && arr.every(x => x.ready) && !gameStarted) {
+                if (useFirebase) {
+                    db.collection("dinosaur").doc("gameState").set({ started: true });
+                } else {
+                    startGame();
+                }
+            }
         }
 
-        function startGame() { if (gameStarted) return; gameStarted = true; waiting.classList.add("hidden"); startEngine(); }
+        function startGame() {
+            if (gameStarted) return;
+            gameStarted = true;
+            // Synchronized countdown for all players
+            const waitEl = document.getElementById('waiting');
+            const countEl = document.getElementById('readyCount');
+            waitEl.childNodes[0].textContent = '🚀 เริ่มใน... ';
+            let count = 3;
+            countEl.innerHTML = count;
+            countEl.style.fontSize = 'clamp(48px, 8vw, 80px)';
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countEl.innerHTML = count;
+                } else if (count === 0) {
+                    countEl.innerHTML = '🏁 GO!';
+                    countEl.style.color = '#00ff88';
+                    countEl.style.textShadow = '0 0 20px #00ff88';
+                } else {
+                    clearInterval(countInterval);
+                    waitEl.classList.add('hidden');
+                    startEngine();
+                }
+            }, 1000);
+        }
 
         function startEngine() {
             score = 0; time = 0; alive = true; playerY = 0; velocityY = 0; obstacles = []; touchCooldown = false;
@@ -1520,18 +1576,46 @@
             alive = false;
             clearInterval(gameLoop); clearInterval(treeLoop); clearInterval(timeLoop);
             renderPlayers(); updateMe();
-            setTimeout(() => checkAllDead(), 500);
+            // Force immediate sync on death
+            syncToFirebase();
+            setTimeout(() => checkAllDead(), 1500);
         }
+
+        let lastSyncTime = 0;
+        const SYNC_INTERVAL = 100; // Sync to Firebase every 100ms
 
         function updateMe() {
             let mp = players[myId];
             if (mp) { mp.score = score; mp.time = time; mp.alive = alive; mp.y = playerY; }
+            // Throttled sync to Firebase
+            if (useFirebase && myId) {
+                const now = Date.now();
+                if (now - lastSyncTime >= SYNC_INTERVAL) {
+                    lastSyncTime = now;
+                    syncToFirebase();
+                }
+            }
+        }
+
+        function syncToFirebase() {
+            if (!useFirebase || !myId) return;
+            db.collection("dinosaur").doc(myId).update({
+                score: score,
+                time: time,
+                alive: alive,
+                y: playerY
+            });
         }
 
         function checkAllDead() {
             let allDead = true;
             Object.values(players).forEach(x => { if (x.alive) allDead = false; });
-            if (allDead) showResult();
+            if (allDead) {
+                showResult();
+            } else if (!alive) {
+                // Keep polling until all players are dead (wait for Firebase sync)
+                setTimeout(() => checkAllDead(), 1000);
+            }
         }
 
         function showResult() {
