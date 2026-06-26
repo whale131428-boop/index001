@@ -550,25 +550,30 @@
             left: 0;
             width: 200%;
             height: 100%;
-            background: repeating-linear-gradient(90deg,
-                    transparent 0px, transparent 20px,
-                    rgba(255, 255, 255, 0.12) 20px, rgba(255, 255, 255, 0.12) 24px,
-                    transparent 24px, transparent 44px,
-                    rgba(100, 200, 255, 0.08) 44px, rgba(100, 200, 255, 0.08) 48px);
-            animation: wave-move 2.5s linear infinite;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="28"><rect x="10" y="4" width="16" height="3" fill="rgba(255,255,255,0.25)"/><rect x="45" y="18" width="12" height="3" fill="rgba(150,220,255,0.2)"/></svg>');
+            animation: wave-move 3.5s linear infinite;
             z-index: 3;
         }
 
         .sea-waves-2 {
             position: absolute;
-            top: 20%;
+            top: 0;
             left: 0;
             width: 200%;
-            height: 80%;
-            background: repeating-linear-gradient(90deg,
-                    transparent 0px, transparent 32px,
-                    rgba(255, 255, 255, 0.07) 32px, rgba(255, 255, 255, 0.07) 36px);
-            animation: wave-move 4s linear infinite reverse;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40"><rect x="25" y="10" width="10" height="3" fill="rgba(255,255,255,0.15)"/><rect x="70" y="30" width="18" height="3" fill="rgba(100,200,255,0.15)"/></svg>');
+            animation: wave-move 5s linear infinite reverse;
+            z-index: 3;
+        }
+
+        .sea-waves-3 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="110" height="50"><rect x="5" y="25" width="20" height="3" fill="rgba(255,255,255,0.1)"/><rect x="60" y="5" width="14" height="3" fill="rgba(150,200,255,0.1)"/></svg>');
+            animation: wave-move 6.5s linear infinite;
             z-index: 3;
         }
 
@@ -1104,6 +1109,7 @@
                 <div class="pixelSea">
                     <div class="sea-waves"></div>
                     <div class="sea-waves-2"></div>
+                    <div class="sea-waves-3"></div>
                 </div>
 
                 <!-- Background distant islands -->
