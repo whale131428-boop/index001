@@ -598,22 +598,33 @@
         .lane {
             position: absolute;
             width: 100%;
-            height: 33.33%;
             border-bottom: 3px solid rgba(0, 229, 255, 0.3);
             z-index: 10;
         }
 
-        .lane1 {
-            top: 0;
-        }
+        /* Support 3-5 players */
+        .lane1, .lane2, .lane3 { height: 33.33%; }
+        .lane1 { top: 0; }
+        .lane2 { top: 33.33%; }
+        .lane3 { top: 66.66%; }
 
-        .lane2 {
-            top: 33.33%;
+        /* Additional lanes when more players join */
+        body.multi-5players .lane {
+            height: 20%;
         }
+        body.multi-5players .lane1 { top: 0; }
+        body.multi-5players .lane2 { top: 20%; }
+        body.multi-5players .lane3 { top: 40%; }
+        body.multi-5players .lane4 { top: 60%; }
+        body.multi-5players .lane5 { top: 80%; }
 
-        .lane3 {
-            top: 66.66%;
+        body.multi-4players .lane {
+            height: 25%;
         }
+        body.multi-4players .lane1 { top: 0; }
+        body.multi-4players .lane2 { top: 25%; }
+        body.multi-4players .lane3 { top: 50%; }
+        body.multi-4players .lane4 { top: 75%; }
 
         /* Pixel island platform */
         .island-platform {
@@ -1070,6 +1081,26 @@
                     <div class="animalName">หมี</div>
                     <input id="bearName" type="text" placeholder="Player Name">
                 </div>
+                <div class="animalCard" id="dragonCard">
+                    <span class="animalIcon">🐉</span>
+                    <div class="animalName">มังกร</div>
+                    <input id="dragonName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="penguinCard">
+                    <span class="animalIcon">🐧</span>
+                    <div class="animalName">เพนกวิน</div>
+                    <input id="penguinName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="rabbitCard">
+                    <span class="animalIcon">🐰</span>
+                    <div class="animalName">กระต่าย</div>
+                    <input id="rabbitName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="foxCard">
+                    <span class="animalIcon">🦊</span>
+                    <div class="animalName">สุนัขจิ้งจอก</div>
+                    <input id="foxName" type="text" placeholder="Player Name">
+                </div>
             </div>
             <div id="roomCodeDisplay">
                 <div class="rc-label">📢 แชร์รหัสห้องนี้ให้เพื่อน</div>
@@ -1101,6 +1132,26 @@
                     <span class="animalIcon">🐻</span>
                     <div class="animalName">หมี</div>
                     <input id="solobearName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solodragonCard">
+                    <span class="animalIcon">🐉</span>
+                    <div class="animalName">มังกร</div>
+                    <input id="solodragonName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solopenguinCard">
+                    <span class="animalIcon">🐧</span>
+                    <div class="animalName">เพนกวิน</div>
+                    <input id="solopenguinName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solorabbitCard">
+                    <span class="animalIcon">🐰</span>
+                    <div class="animalName">กระต่าย</div>
+                    <input id="solorabbitName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solofoxCard">
+                    <span class="animalIcon">🦊</span>
+                    <div class="animalName">สุนัขจิ้งจอก</div>
+                    <input id="solofoxName" type="text" placeholder="Player Name">
                 </div>
             </div>
             <button id="soloReadyBtn">▶ START GAME ▶</button>
@@ -1190,6 +1241,34 @@
                         <div class="island-water"></div>
                     </div>
                     <div id="player3" class="player player3"><canvas id="bearSprite" width="48" height="48"
+                            style="image-rendering:pixelated;width:48px;height:48px;"></canvas></div>
+                </div>
+
+                <!-- Lane 4 - Dragon -->
+                <div class="lane lane4">
+                    <div class="playerLabel playerName4">Player 4</div>
+                    <div class="island-platform">
+                        <div class="island-palm">🌴</div>
+                        <div class="island-body">
+                            <div class="island-sand"></div>
+                        </div>
+                        <div class="island-water"></div>
+                    </div>
+                    <div id="player4" class="player player4"><canvas id="dragonSprite" width="48" height="48"
+                            style="image-rendering:pixelated;width:48px;height:48px;"></canvas></div>
+                </div>
+
+                <!-- Lane 5 - Penguin -->
+                <div class="lane lane5">
+                    <div class="playerLabel playerName5">Player 5</div>
+                    <div class="island-platform">
+                        <div class="island-palm">🌴</div>
+                        <div class="island-body">
+                            <div class="island-sand"></div>
+                        </div>
+                        <div class="island-water"></div>
+                    </div>
+                    <div id="player5" class="player player5"><canvas id="penguinSprite" width="48" height="48"
                             style="image-rendering:pixelated;width:48px;height:48px;"></canvas></div>
                 </div>
             </div>
@@ -1382,6 +1461,118 @@
                 ctx.fillRect(3 * S, 10 * S, 3 * S, 2 * S + legOff3);
                 ctx.fillRect(7 * S, 10 * S, 3 * S, 2 * S + (legOff3 === 0 ? S : 0));
                 ctx.fillRect(11 * S, 10 * S, 3 * S, 2 * S + legOff3);
+            } else if (type === 'dragon') {
+                // Body (longer and more angular)
+                ctx.fillStyle = '#c71585';
+                ctx.fillRect(2 * S, 5 * S, 12 * S, 4 * S);
+                // Head
+                ctx.fillStyle = '#e41d91';
+                ctx.fillRect(11 * S, 2 * S, 6 * S, 5 * S);
+                // Horns
+                ctx.fillStyle = '#a01570';
+                ctx.fillRect(12 * S, 0 * S, 2 * S, 3 * S);
+                ctx.fillRect(14 * S, 0 * S, 2 * S, 3 * S);
+                // Eyes
+                ctx.fillStyle = '#ffff00';
+                ctx.fillRect(13 * S, 3 * S, 1 * S, 1 * S);
+                ctx.fillRect(15 * S, 3 * S, 1 * S, 1 * S);
+                // Tail
+                ctx.fillStyle = '#a01570';
+                ctx.fillRect(0 * S, 4 * S, 3 * S, 3 * S);
+                ctx.fillRect(1 * S, 3 * S, 2 * S, 2 * S);
+                // Spikes on back
+                ctx.fillStyle = '#c71585';
+                ctx.fillRect(4 * S, 4 * S, 1 * S, 2 * S);
+                ctx.fillRect(7 * S, 4 * S, 1 * S, 2 * S);
+                ctx.fillRect(10 * S, 4 * S, 1 * S, 2 * S);
+                // Wing effect
+                ctx.fillStyle = '#8b0f6a';
+                ctx.fillRect(5 * S, 6 * S, 2 * S, 2 * S);
+                ctx.fillRect(10 * S, 6 * S, 2 * S, 2 * S);
+            } else if (type === 'penguin') {
+                // Body (vertical)
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(4 * S, 4 * S, 8 * S, 8 * S);
+                // Belly
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(6 * S, 6 * S, 4 * S, 5 * S);
+                // Head
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(5 * S, 1 * S, 6 * S, 5 * S);
+                // Eyes
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(7 * S, 2 * S, 1 * S, 1 * S);
+                ctx.fillRect(10 * S, 2 * S, 1 * S, 1 * S);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(7 * S, 2 * S, 1 * S, 1 * S);
+                // Beak
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(8 * S, 5 * S, 2 * S, 1 * S);
+                // Feet
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(6 * S, 12 * S, 1 * S, 1 * S);
+                ctx.fillRect(9 * S, 12 * S, 1 * S, 1 * S);
+                // Flippers
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(2 * S, 6 * S, 2 * S, 4 * S);
+                ctx.fillRect(12 * S, 6 * S, 2 * S, 4 * S);
+            } else if (type === 'rabbit') {
+                // Body
+                ctx.fillStyle = '#daa520';
+                ctx.fillRect(4 * S, 5 * S, 8 * S, 6 * S);
+                // Head
+                ctx.fillStyle = '#e6b84d';
+                ctx.fillRect(6 * S, 1 * S, 6 * S, 5 * S);
+                // Long ears
+                ctx.fillStyle = '#daa520';
+                ctx.fillRect(7 * S, -3 * S, 2 * S, 5 * S);
+                ctx.fillRect(9 * S, -3 * S, 2 * S, 5 * S);
+                ctx.fillStyle = '#ffb3ba';
+                ctx.fillRect(8 * S, -2 * S, 1 * S, 3 * S);
+                ctx.fillRect(10 * S, -2 * S, 1 * S, 3 * S);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(8 * S, 2 * S, 1 * S, 1 * S);
+                ctx.fillRect(11 * S, 2 * S, 1 * S, 1 * S);
+                // Nose
+                ctx.fillStyle = '#ffb3ba';
+                ctx.fillRect(9 * S, 4 * S, 1 * S, 1 * S);
+                // Paws
+                ctx.fillStyle = '#daa520';
+                const pawOff = frame % 2 === 0 ? 0 : S;
+                ctx.fillRect(5 * S, 11 * S, 2 * S, 1 * S + pawOff);
+                ctx.fillRect(9 * S, 11 * S, 2 * S, 1 * S + (pawOff === 0 ? S : 0));
+            } else if (type === 'fox') {
+                // Body
+                ctx.fillStyle = '#ff6b35';
+                ctx.fillRect(3 * S, 4 * S, 10 * S, 5 * S);
+                // Head
+                ctx.fillStyle = '#ff7844';
+                ctx.fillRect(9 * S, 1 * S, 5 * S, 5 * S);
+                // Ears (pointy, triangular)
+                ctx.fillStyle = '#ff6b35';
+                ctx.fillRect(9 * S, 0 * S, 2 * S, 3 * S);
+                ctx.fillRect(12 * S, 0 * S, 2 * S, 3 * S);
+                ctx.fillStyle = '#ffb3ba';
+                ctx.fillRect(10 * S, 1 * S, 1 * S, 2 * S);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(11 * S, 2 * S, 1 * S, 1 * S);
+                ctx.fillRect(13 * S, 2 * S, 1 * S, 1 * S);
+                ctx.fillStyle = '#ffff00';
+                ctx.fillRect(11 * S, 2 * S, 1 * S, 1 * S);
+                // Snout
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(12 * S, 3 * S, 3 * S, 2 * S);
+                // Tail (bushy effect)
+                ctx.fillStyle = '#d35400';
+                ctx.fillRect(0 * S, 3 * S, 3 * S, 2 * S);
+                ctx.fillRect(1 * S, 2 * S, 2 * S, 2 * S);
+                // Legs
+                ctx.fillStyle = '#ff6b35';
+                const foxLegOff = frame % 2 === 0 ? 0 : S;
+                ctx.fillRect(4 * S, 9 * S, 2 * S, 2 * S + foxLegOff);
+                ctx.fillRect(8 * S, 9 * S, 2 * S, 2 * S + (foxLegOff === 0 ? S : 0));
             }
         }
 
@@ -1409,6 +1600,8 @@
             drawPixelAnimal(document.getElementById('dogSprite'), 'dog', 0);
             drawPixelAnimal(document.getElementById('catSprite'), 'cat', 0);
             drawPixelAnimal(document.getElementById('bearSprite'), 'bear', 0);
+            drawPixelAnimal(document.getElementById('dragonSprite'), 'dragon', 0);
+            drawPixelAnimal(document.getElementById('penguinSprite'), 'penguin', 0);
 
             // Animate sprites
             let af = 0;
@@ -1417,6 +1610,8 @@
                 drawPixelAnimal(document.getElementById('dogSprite'), 'dog', af);
                 drawPixelAnimal(document.getElementById('catSprite'), 'cat', af);
                 drawPixelAnimal(document.getElementById('bearSprite'), 'bear', af);
+                drawPixelAnimal(document.getElementById('dragonSprite'), 'dragon', af);
+                drawPixelAnimal(document.getElementById('penguinSprite'), 'penguin', af);
             }, 200);
 
             // Stars canvas
@@ -1446,8 +1641,12 @@
             roomInput = document.getElementById("roomInput"), readyBtn = document.getElementById("readyBtn"),
             restartBtn = document.getElementById("restartBtn"), dogCard = document.getElementById("dogCard"),
             catCard = document.getElementById("catCard"), bearCard = document.getElementById("bearCard"),
+            dragonCard = document.getElementById("dragonCard"), penguinCard = document.getElementById("penguinCard"),
+            rabbitCard = document.getElementById("rabbitCard"), foxCard = document.getElementById("foxCard"),
             dogName = document.getElementById("dogName"), catName = document.getElementById("catName"),
-            bearName = document.getElementById("bearName"), gameArea = document.getElementById("gameArea"),
+            bearName = document.getElementById("bearName"), dragonName = document.getElementById("dragonName"),
+            penguinName = document.getElementById("penguinName"), rabbitName = document.getElementById("rabbitName"),
+            foxName = document.getElementById("foxName"), gameArea = document.getElementById("gameArea"),
             waiting = document.getElementById("waiting"), leaderboard = document.getElementById("leaderboard"),
             status = document.getElementById("status");
 
@@ -1456,9 +1655,17 @@
         const solodogCard = document.getElementById("solodogCard");
         const solocatCard = document.getElementById("solocatCard");
         const solobearCard = document.getElementById("solobearCard");
+        const solodragonCard = document.getElementById("solodragonCard");
+        const solopenguinCard = document.getElementById("solopenguinCard");
+        const sololrabbitCard = document.getElementById("sololrabbitCard");
+        const solofoxCard = document.getElementById("solofoxCard");
         const solodogName = document.getElementById("solodogName");
         const solocatName = document.getElementById("solocatName");
         const solobearName = document.getElementById("solobearName");
+        const solodragonName = document.getElementById("solodragonName");
+        const solopenguinName = document.getElementById("solopenguinName");
+        const sololrabbitName = document.getElementById("sololrabbitName");
+        const solofoxName = document.getElementById("solofoxName");
         const soloReadyBtn = document.getElementById("soloReadyBtn");
         const backBtn = document.getElementById("backBtn");
         let soloAnimal = "";
@@ -1468,22 +1675,38 @@
         dogCard.onclick = () => { myAnimal = "dog"; updateSelectedCard(); };
         catCard.onclick = () => { myAnimal = "cat"; updateSelectedCard(); };
         bearCard.onclick = () => { myAnimal = "bear"; updateSelectedCard(); };
+        dragonCard.onclick = () => { myAnimal = "dragon"; updateSelectedCard(); };
+        penguinCard.onclick = () => { myAnimal = "penguin"; updateSelectedCard(); };
+        rabbitCard.onclick = () => { myAnimal = "rabbit"; updateSelectedCard(); };
+        foxCard.onclick = () => { myAnimal = "fox"; updateSelectedCard(); };
         function updateSelectedCard() {
             document.querySelectorAll(".animalCard").forEach(c => c.classList.remove("selected"));
             if (myAnimal === "dog") dogCard.classList.add("selected");
             if (myAnimal === "cat") catCard.classList.add("selected");
             if (myAnimal === "bear") bearCard.classList.add("selected");
+            if (myAnimal === "dragon") dragonCard.classList.add("selected");
+            if (myAnimal === "penguin") penguinCard.classList.add("selected");
+            if (myAnimal === "rabbit") rabbitCard.classList.add("selected");
+            if (myAnimal === "fox") foxCard.classList.add("selected");
         }
 
         // NEW: Solo mode character selection
         solodogCard.onclick = () => { soloAnimal = "dog"; updateSoloSelectedCard(); };
         solocatCard.onclick = () => { soloAnimal = "cat"; updateSoloSelectedCard(); };
         solobearCard.onclick = () => { soloAnimal = "bear"; updateSoloSelectedCard(); };
+        solodragonCard.onclick = () => { soloAnimal = "dragon"; updateSoloSelectedCard(); };
+        solopenguinCard.onclick = () => { soloAnimal = "penguin"; updateSoloSelectedCard(); };
+        solorabbitCard.onclick = () => { soloAnimal = "rabbit"; updateSoloSelectedCard(); };
+        solofoxCard.onclick = () => { soloAnimal = "fox"; updateSoloSelectedCard(); };
         function updateSoloSelectedCard() {
             document.querySelectorAll("#screen2b .animalCard").forEach(c => c.classList.remove("selected"));
             if (soloAnimal === "dog") solodogCard.classList.add("selected");
             if (soloAnimal === "cat") solocatCard.classList.add("selected");
             if (soloAnimal === "bear") solobearCard.classList.add("selected");
+            if (soloAnimal === "dragon") solodragonCard.classList.add("selected");
+            if (soloAnimal === "penguin") solopenguinCard.classList.add("selected");
+            if (soloAnimal === "rabbit") solorabbitCard.classList.add("selected");
+            if (soloAnimal === "fox") solofoxCard.classList.add("selected");
         }
 
         // NEW: Solo button handler
@@ -1534,6 +1757,10 @@
             if (animal === 'dog') return 'Player 1';
             if (animal === 'cat') return 'Player 2';
             if (animal === 'bear') return 'Player 3';
+            if (animal === 'dragon') return 'Player 4';
+            if (animal === 'penguin') return 'Player 5';
+            if (animal === 'rabbit') return 'Player 6';
+            if (animal === 'fox') return 'Player 7';
             return null;
         }
 
@@ -1587,9 +1814,13 @@
         readyBtn.onclick = () => {
             initAudio();
             if (myAnimal === "") { alert("Please select a character"); return; }
-            if (myAnimal === "dog") myName = dogName.value || "🐶 Player";
-            if (myAnimal === "cat") myName = catName.value || "🐱 Player";
-            if (myAnimal === "bear") myName = bearName.value || "🐻 Player";
+            if (myAnimal === "dog") myName = dogName.value || "🐶 Dog";
+            if (myAnimal === "cat") myName = catName.value || "🐱 Cat";
+            if (myAnimal === "bear") myName = bearName.value || "🐻 Bear";
+            if (myAnimal === "dragon") myName = dragonName.value || "🐉 Dragon";
+            if (myAnimal === "penguin") myName = penguinName.value || "🐧 Penguin";
+            if (myAnimal === "rabbit") myName = rabbitName.value || "🐰 Rabbit";
+            if (myAnimal === "fox") myName = foxName.value || "🦊 Fox";
             myId = getPlayerDoc(myAnimal);
             let pd = { name: myName, animal: myAnimal, score: 0, time: 0, alive: true, ready: true, y: 0 };
             if (useFirebase) db.collection("dinosaur").doc(myId).set(pd);
@@ -1604,6 +1835,10 @@
             if (soloAnimal === "dog") myName = solodogName.value || "🐶 Solo Player";
             if (soloAnimal === "cat") myName = solocatName.value || "🐱 Solo Player";
             if (soloAnimal === "bear") myName = solobearName.value || "🐻 Solo Player";
+            if (soloAnimal === "dragon") myName = solodragonName.value || "🐉 Solo Player";
+            if (soloAnimal === "penguin") myName = solopenguinName.value || "🐧 Solo Player";
+            if (soloAnimal === "rabbit") myName = solorabbitName.value || "🐰 Solo Player";
+            if (soloAnimal === "fox") myName = solofoxName.value || "🦊 Solo Player";
 
             myAnimal = soloAnimal;
             myId = "Player 1"; // Use Player 1 for solo mode
@@ -1738,6 +1973,13 @@
 
         function renderPlayers() {
             if (!players) return;
+            // Determine number of active players for multi-player mode
+            let playerCount = Object.keys(players).length;
+            if (!soloMode && playerCount > 3) {
+                if (playerCount === 4) document.body.classList.add('multi-4players');
+                else if (playerCount === 5) document.body.classList.add('multi-5players');
+            }
+
             Object.keys(players).forEach(key => {
                 let p = players[key];
                 let elIdx;
@@ -1747,6 +1989,8 @@
                     if (key === 'Player 1') elIdx = 1;
                     else if (key === 'Player 2') elIdx = 2;
                     else if (key === 'Player 3') elIdx = 3;
+                    else if (key === 'Player 4') elIdx = 4;
+                    else if (key === 'Player 5') elIdx = 5;
                     else return;
                 }
 
@@ -1754,10 +1998,11 @@
                 let nameEl = document.querySelector(".playerName" + elIdx);
                 if (!el || !nameEl) return;
                 // Update sprite inside canvas
-                let cid = ['dogSprite', 'catSprite', 'bearSprite'][elIdx - 1];
+                let spriteIds = ['dogSprite', 'catSprite', 'bearSprite', 'dragonSprite', 'penguinSprite'];
+                let cid = spriteIds[elIdx - 1];
                 let cv = document.getElementById(cid);
                 if (cv) {
-                    let atype = p.animal || ['dog', 'cat', 'bear'][elIdx - 1];
+                    let atype = p.animal || ['dog', 'cat', 'bear', 'dragon', 'penguin'][elIdx - 1];
                     drawPixelAnimal(cv, atype, Math.floor(Date.now() / 200) % 4);
                 }
                 el.style.bottom = `${4 + p.y}px`;
@@ -1775,7 +2020,17 @@
                 if (!alive) return;
                 const types = ['tree', 'bird'];
                 const type = types[Math.floor(Math.random() * types.length)];
-                let targetLane = soloMode ? 2 : Math.floor(Math.random() * 3) + 1;
+                let targetLane;
+                if (soloMode) {
+                    targetLane = 2;
+                } else {
+                    // Determine max lane based on number of players
+                    let maxLane = 3;
+                    let playerCount = Object.keys(players).length;
+                    if (playerCount >= 4) maxLane = 4;
+                    if (playerCount >= 5) maxLane = 5;
+                    targetLane = Math.floor(Math.random() * maxLane) + 1;
+                }
                 obstacles.push({ x: 1200, lane: targetLane, passed: false, type: type });
             }, 1800);
         }
@@ -1820,8 +2075,12 @@
                 myLane = 2; // Solo mode uses middle lane
             } else {
                 if (myAnimal === "dog") myLane = 1;
-                if (myAnimal === "cat") myLane = 2;
-                if (myAnimal === "bear") myLane = 3;
+                else if (myAnimal === "cat") myLane = 2;
+                else if (myAnimal === "bear") myLane = 3;
+                else if (myAnimal === "dragon") myLane = 4;
+                else if (myAnimal === "penguin") myLane = 5;
+                else if (myAnimal === "rabbit") myLane = 3; // Rabbit uses lane 3
+                else if (myAnimal === "fox") myLane = 1; // Fox uses lane 1
             }
             for (let t of obstacles) {
                 if (t.lane !== myLane) continue;
