@@ -1648,15 +1648,26 @@
 
         function renderPlayers() {
             if (!players) return;
-            Object.values(players).forEach((p, i) => {
-                let el = document.getElementById("player" + (i + 1));
-                let nameEl = document.querySelector(".playerName" + (i + 1));
+            Object.keys(players).forEach(key => {
+                let p = players[key];
+                let elIdx;
+                if (soloMode) {
+                    elIdx = 2; // Always render to lane 2 in solo
+                } else {
+                    if (key === 'Player 1') elIdx = 1;
+                    else if (key === 'Player 2') elIdx = 2;
+                    else if (key === 'Player 3') elIdx = 3;
+                    else return;
+                }
+                
+                let el = document.getElementById("player" + elIdx);
+                let nameEl = document.querySelector(".playerName" + elIdx);
                 if (!el || !nameEl) return;
                 // Update sprite inside canvas
-                let cid = ['dogSprite', 'catSprite', 'bearSprite'][i];
+                let cid = ['dogSprite', 'catSprite', 'bearSprite'][elIdx - 1];
                 let cv = document.getElementById(cid);
                 if (cv) {
-                    let atype = p.animal || ['dog', 'cat', 'bear'][i];
+                    let atype = p.animal || ['dog', 'cat', 'bear'][elIdx - 1];
                     drawPixelAnimal(cv, atype, Math.floor(Date.now() / 200) % 4);
                 }
                 el.style.bottom = `${4 + p.y}px`;
@@ -1674,7 +1685,8 @@
                 if (!alive) return;
                 const types = ['tree', 'bird'];
                 const type = types[Math.floor(Math.random() * types.length)];
-                obstacles.push({ x: 1200, lane: Math.floor(Math.random() * 3) + 1, passed: false, type: type });
+                let targetLane = soloMode ? 2 : Math.floor(Math.random() * 3) + 1;
+                obstacles.push({ x: 1200, lane: targetLane, passed: false, type: type });
             }, 1800);
         }
 
@@ -1704,7 +1716,12 @@
                 }
 
                 d.style.left = t.x + "px";
-                gameArea.appendChild(d);
+                let laneEl = document.querySelector(".lane" + t.lane);
+                if (laneEl) {
+                    laneEl.appendChild(d);
+                } else {
+                    gameArea.appendChild(d);
+                }
             });
         }
 
