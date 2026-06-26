@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
-#h
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -733,8 +733,13 @@
         }
 
         @keyframes flap {
-            from { transform: translateY(0); }
-            to { transform: translateY(-8px); }
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-8px);
+            }
         }
 
         /* Waiting overlay */
@@ -934,6 +939,26 @@
                 width: 180px;
             }
         }
+
+        /* Solo mode styles */
+        body.solo-mode #player1,
+        body.solo-mode #player3,
+        body.solo-mode .playerName1,
+        body.solo-mode .playerName3,
+        body.solo-mode .lane1,
+        body.solo-mode .lane3 {
+            display: none !important;
+        }
+
+        body.solo-mode #player2,
+        body.solo-mode .lane2 {
+            width: 100% !important;
+        }
+
+        body.solo-mode .playerName2 {
+            left: 50%;
+            transform: translateX(-50%);
+        }
     </style>
 </head>
 
@@ -991,12 +1016,15 @@
 
             <div class="start-content">
                 <div class="title">🎮 PIXEL SEA RUNNER 🎮</div>
-                <div class="subtitle">🌊 The ultimate multiplayer island game! 🌊</div>
-                <button id="playBtn">▶ PLAY GAME ▶</button>
+                <div class="subtitle">🌊 The ultimate island game! 🌊</div>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button id="soloBtn">🎮 SOLO MODE 🎮</button>
+                    <button id="playBtn">👥 MULTIPLAYER 👥</button>
+                </div>
             </div>
         </div>
 
-        <!-- ===== PAGE 2 - Lobby ===== -->
+        <!-- ===== PAGE 2 - Multiplayer Lobby ===== -->
         <div id="screen2" class="screen hidden">
             <h1>🎲 CHARACTER SELECTION</h1>
             <div class="roomBox">
@@ -1029,6 +1057,31 @@
             </div>
             <div id="status">ยังไม่เชื่อมห้อง</div>
             <button id="readyBtn">✓ START GAME ✓</button>
+        </div>
+
+        <!-- ===== PAGE 2B - Solo Mode ===== -->
+        <div id="screen2b" class="screen hidden">
+            <h1>🎮 SOLO MODE</h1>
+            <h2>เลือกตัวละคร</h2>
+            <div class="animals">
+                <div class="animalCard" id="solodogCard">
+                    <span class="animalIcon">🐶</span>
+                    <div class="animalName">หมา</div>
+                    <input id="solodogName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solocatCard">
+                    <span class="animalIcon">🐱</span>
+                    <div class="animalName">แมว</div>
+                    <input id="solocatName" type="text" placeholder="Player Name">
+                </div>
+                <div class="animalCard" id="solobearCard">
+                    <span class="animalIcon">🐻</span>
+                    <div class="animalName">หมี</div>
+                    <input id="solobearName" type="text" placeholder="Player Name">
+                </div>
+            </div>
+            <button id="soloReadyBtn">▶ START GAME ▶</button>
+            <button id="backBtn" style="margin-top: 20px; background: #003d1f; color: #00ff88; border-color: #00ff88;">⬅ BACK ⬅</button>
         </div>
 
         <!-- ===== PAGE 3 - Game ===== -->
@@ -1358,6 +1411,7 @@
         const gravity = 1.2, jumpPower = 18;
         let gameLoop = null, timeLoop = null, obstacles = [], obstacleSpeed = 8, myLane = 1;
         let roomId = "", myId = "p" + Math.floor(Math.random() * 1000000), myAnimal = "", myName = "", players = {}, useFirebase = false;
+        let soloMode = false;  // NEW: Solo mode flag
 
         const playBtn = document.getElementById("playBtn"), connectBtn = document.getElementById("connectBtn"),
             roomInput = document.getElementById("roomInput"), readyBtn = document.getElementById("readyBtn"),
@@ -1367,6 +1421,18 @@
             bearName = document.getElementById("bearName"), gameArea = document.getElementById("gameArea"),
             waiting = document.getElementById("waiting"), leaderboard = document.getElementById("leaderboard"),
             status = document.getElementById("status");
+
+        // NEW: Solo mode elements
+        const soloBtn = document.getElementById("soloBtn");
+        const solodogCard = document.getElementById("solodogCard");
+        const solocatCard = document.getElementById("solocatCard");
+        const solobearCard = document.getElementById("solobearCard");
+        const solodogName = document.getElementById("solodogName");
+        const solocatName = document.getElementById("solocatName");
+        const solobearName = document.getElementById("solobearName");
+        const soloReadyBtn = document.getElementById("soloReadyBtn");
+        const backBtn = document.getElementById("backBtn");
+        let soloAnimal = "";
 
         function changeScreen(s) { document.querySelectorAll(".screen").forEach(x => x.classList.add("hidden")); document.getElementById("screen" + s).classList.remove("hidden"); }
 
@@ -1379,6 +1445,30 @@
             if (myAnimal === "cat") catCard.classList.add("selected");
             if (myAnimal === "bear") bearCard.classList.add("selected");
         }
+
+        // NEW: Solo mode character selection
+        solodogCard.onclick = () => { soloAnimal = "dog"; updateSoloSelectedCard(); };
+        solocatCard.onclick = () => { soloAnimal = "cat"; updateSoloSelectedCard(); };
+        solobearCard.onclick = () => { soloAnimal = "bear"; updateSoloSelectedCard(); };
+        function updateSoloSelectedCard() {
+            document.querySelectorAll("#screen2b .animalCard").forEach(c => c.classList.remove("selected"));
+            if (soloAnimal === "dog") solodogCard.classList.add("selected");
+            if (soloAnimal === "cat") solocatCard.classList.add("selected");
+            if (soloAnimal === "bear") solobearCard.classList.add("selected");
+        }
+
+        // NEW: Solo button handler
+        soloBtn.onclick = () => { 
+            soloMode = true;
+            changeScreen("2b"); 
+        };
+
+        // NEW: Back button
+        backBtn.onclick = () => {
+            soloMode = false;
+            soloAnimal = "";
+            changeScreen(1);
+        };
 
         let db;
 
@@ -1469,6 +1559,26 @@
             changeScreen(3); updateLobby(); checkReady();
         };
 
+        // NEW: Solo ready button
+        soloReadyBtn.onclick = () => {
+            if (soloAnimal === "") { alert("Please select a character"); return; }
+            if (soloAnimal === "dog") myName = solodogName.value || "🐶 Solo Player";
+            if (soloAnimal === "cat") myName = solocatName.value || "🐱 Solo Player";
+            if (soloAnimal === "bear") myName = solobearName.value || "🐻 Solo Player";
+            
+            myAnimal = soloAnimal;
+            myId = "Player 1"; // Use Player 1 for solo mode
+            
+            // Initialize solo players object with just one player in middle lane
+            players = {
+                "Player 1": { name: myName, animal: myAnimal, score: 0, time: 0, alive: true, ready: true, y: 0 }
+            };
+            
+            changeScreen(3);
+            // Start game immediately in solo mode
+            setTimeout(() => startGame(), 500);
+        };
+
         function checkReady() {
             let arr = Object.values(players);
             if (arr.length >= 3 && arr.every(x => x.ready) && !gameStarted) {
@@ -1483,10 +1593,24 @@
         function startGame() {
             if (gameStarted) return;
             gameStarted = true;
+            
+            // Apply solo mode styling if needed
+            if (soloMode) {
+                document.body.classList.add('solo-mode');
+            } else {
+                document.body.classList.remove('solo-mode');
+            }
+            
             // Synchronized countdown for all players
             const waitEl = document.getElementById('waiting');
             const countEl = document.getElementById('readyCount');
-            waitEl.childNodes[0].textContent = '🚀 เริ่มใน... ';
+            
+            if (soloMode) {
+                waitEl.childNodes[0].textContent = '🎮 เริ่มใน... ';
+            } else {
+                waitEl.childNodes[0].textContent = '🚀 เริ่มใน... ';
+            }
+            
             let count = 3;
             countEl.innerHTML = count;
             countEl.style.fontSize = 'clamp(48px, 8vw, 80px)';
@@ -1571,23 +1695,27 @@
                 if (t.lane === 1) d.classList.add("obs1");
                 if (t.lane === 2) d.classList.add("obs2");
                 if (t.lane === 3) d.classList.add("obs3");
-                
+
                 // Add correct emoji based on type
                 if (t.type === 'bird') {
                     d.innerHTML = "🦅";
                 } else {
                     d.innerHTML = "🌴";
                 }
-                
+
                 d.style.left = t.x + "px";
                 gameArea.appendChild(d);
             });
         }
 
         function collisionCheck() {
-            if (myAnimal === "dog") myLane = 1;
-            if (myAnimal === "cat") myLane = 2;
-            if (myAnimal === "bear") myLane = 3;
+            if (soloMode) {
+                myLane = 2; // Solo mode uses middle lane
+            } else {
+                if (myAnimal === "dog") myLane = 1;
+                if (myAnimal === "cat") myLane = 2;
+                if (myAnimal === "bear") myLane = 3;
+            }
             for (let t of obstacles) {
                 if (t.lane !== myLane) continue;
                 if (t.x > 80 && t.x < 170) {
@@ -1640,7 +1768,12 @@
                 showResult();
             } else if (!alive) {
                 // Keep polling until all players are dead (wait for Firebase sync)
-                setTimeout(() => checkAllDead(), 1000);
+                // In solo mode, end immediately when player dies
+                if (soloMode) {
+                    showResult();
+                } else {
+                    setTimeout(() => checkAllDead(), 1000);
+                }
             }
         }
 
@@ -1650,14 +1783,27 @@
             arr.sort((a, b) => b.score === a.score ? b.time - a.time : b.score - a.score);
             leaderboard.innerHTML = "";
             const medal = ["🥇", "🥈", "🥉"];
-            arr.forEach((p, i) => {
-                leaderboard.innerHTML += `<div class="rank"><div class="rank-medal">${medal[i] || "🏅"}</div><div class="rank-info"><strong>${p.name}</strong><br><span class="rank-score">Score: ${p.score} | Time: ${String(Math.floor(p.time / 60)).padStart(2, '0')}:${String(p.time % 60).padStart(2, '0')}</span></div></div>`;
-            });
+            
+            if (soloMode) {
+                // Solo mode: show just the player's score
+                leaderboard.innerHTML = `<div class="rank"><div class="rank-medal">🎮</div><div class="rank-info"><strong>${arr[0].name}</strong><br><span class="rank-score">Score: ${arr[0].score} | Time: ${String(Math.floor(arr[0].time / 60)).padStart(2, '0')}:${String(arr[0].time % 60).padStart(2, '0')}</span></div></div>`;
+            } else {
+                // Multiplayer mode: show all players
+                arr.forEach((p, i) => {
+                    leaderboard.innerHTML += `<div class="rank"><div class="rank-medal">${medal[i] || "🏅"}</div><div class="rank-info"><strong>${p.name}</strong><br><span class="rank-score">Score: ${p.score} | Time: ${String(Math.floor(p.time / 60)).padStart(2, '0')}:${String(p.time % 60).padStart(2, '0')}</span></div></div>`;
+                });
+            }
         }
 
         playBtn.onclick = () => changeScreen(2);
         connectBtn.onclick = () => connectRoom();
-        restartBtn.onclick = () => { gameStarted = false; location.reload(); };
+        restartBtn.onclick = () => { 
+            gameStarted = false;
+            soloMode = false;
+            soloAnimal = "";
+            myAnimal = "";
+            location.reload(); 
+        };
 
         players[myId] = { name: "You", animal: "dog", score: 0, time: 0, alive: true, ready: false, y: 0 };
     </script>
