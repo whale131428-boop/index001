@@ -1057,6 +1057,7 @@
             </div>
             <div id="status">ยังไม่เชื่อมห้อง</div>
             <button id="readyBtn">✓ START GAME ✓</button>
+            <button id="multiBackBtn" style="margin-top: 20px; background: #003d1f; color: #00ff88; border-color: #00ff88;">⬅ BACK ⬅</button>
         </div>
 
         <!-- ===== PAGE 2B - Solo Mode ===== -->
@@ -1081,7 +1082,8 @@
                 </div>
             </div>
             <button id="soloReadyBtn">▶ START GAME ▶</button>
-            <button id="backBtn" style="margin-top: 20px; background: #003d1f; color: #00ff88; border-color: #00ff88;">⬅ BACK ⬅</button>
+            <button id="backBtn" style="margin-top: 20px; background: #003d1f; color: #00ff88; border-color: #00ff88;">⬅
+                BACK ⬅</button>
         </div>
 
         <!-- ===== PAGE 3 - Game ===== -->
@@ -1458,9 +1460,9 @@
         }
 
         // NEW: Solo button handler
-        soloBtn.onclick = () => { 
+        soloBtn.onclick = () => {
             soloMode = true;
-            changeScreen("2b"); 
+            changeScreen("2b");
         };
 
         // NEW: Back button
@@ -1469,6 +1471,14 @@
             soloAnimal = "";
             changeScreen(1);
         };
+
+        const multiBackBtn = document.getElementById("multiBackBtn");
+        if (multiBackBtn) {
+            multiBackBtn.onclick = () => {
+                myAnimal = "";
+                changeScreen(1);
+            };
+        }
 
         let db;
 
@@ -1565,15 +1575,15 @@
             if (soloAnimal === "dog") myName = solodogName.value || "🐶 Solo Player";
             if (soloAnimal === "cat") myName = solocatName.value || "🐱 Solo Player";
             if (soloAnimal === "bear") myName = solobearName.value || "🐻 Solo Player";
-            
+
             myAnimal = soloAnimal;
             myId = "Player 1"; // Use Player 1 for solo mode
-            
+
             // Initialize solo players object with just one player in middle lane
             players = {
                 "Player 1": { name: myName, animal: myAnimal, score: 0, time: 0, alive: true, ready: true, y: 0 }
             };
-            
+
             changeScreen(3);
             // Start game immediately in solo mode
             setTimeout(() => startGame(), 500);
@@ -1593,24 +1603,24 @@
         function startGame() {
             if (gameStarted) return;
             gameStarted = true;
-            
+
             // Apply solo mode styling if needed
             if (soloMode) {
                 document.body.classList.add('solo-mode');
             } else {
                 document.body.classList.remove('solo-mode');
             }
-            
+
             // Synchronized countdown for all players
             const waitEl = document.getElementById('waiting');
             const countEl = document.getElementById('readyCount');
-            
+
             if (soloMode) {
                 waitEl.childNodes[0].textContent = '🎮 เริ่มใน... ';
             } else {
                 waitEl.childNodes[0].textContent = '🚀 เริ่มใน... ';
             }
-            
+
             let count = 3;
             countEl.innerHTML = count;
             countEl.style.fontSize = 'clamp(48px, 8vw, 80px)';
@@ -1659,7 +1669,7 @@
                     else if (key === 'Player 3') elIdx = 3;
                     else return;
                 }
-                
+
                 let el = document.getElementById("player" + elIdx);
                 let nameEl = document.querySelector(".playerName" + elIdx);
                 if (!el || !nameEl) return;
@@ -1800,7 +1810,7 @@
             arr.sort((a, b) => b.score === a.score ? b.time - a.time : b.score - a.score);
             leaderboard.innerHTML = "";
             const medal = ["🥇", "🥈", "🥉"];
-            
+
             if (soloMode) {
                 // Solo mode: show just the player's score
                 leaderboard.innerHTML = `<div class="rank"><div class="rank-medal">🎮</div><div class="rank-info"><strong>${arr[0].name}</strong><br><span class="rank-score">Score: ${arr[0].score} | Time: ${String(Math.floor(arr[0].time / 60)).padStart(2, '0')}:${String(arr[0].time % 60).padStart(2, '0')}</span></div></div>`;
@@ -1814,12 +1824,12 @@
 
         playBtn.onclick = () => changeScreen(2);
         connectBtn.onclick = () => connectRoom();
-        restartBtn.onclick = () => { 
+        restartBtn.onclick = () => {
             gameStarted = false;
             soloMode = false;
             soloAnimal = "";
             myAnimal = "";
-            location.reload(); 
+            location.reload();
         };
 
         players[myId] = { name: "You", animal: "dog", score: 0, time: 0, alive: true, ready: false, y: 0 };
