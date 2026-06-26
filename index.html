@@ -1646,6 +1646,27 @@
             }, 1000);
         }
 
+        function playAnimalSound(type, action) {
+            let text = "";
+            if (type === "dog") {
+                text = action === "jump" ? "โฮ่ง" : "เอ๋ง";
+            } else if (type === "cat") {
+                text = action === "jump" ? "ม้าว" : "แง้ว";
+            } else if (type === "bear") {
+                text = action === "jump" ? "ฮึบ" : "โฮก";
+            }
+            
+            if (text && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                let msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'th-TH';
+                msg.pitch = action === "jump" ? 1.8 : 0.6;
+                msg.rate = action === "jump" ? 1.8 : 0.9;
+                msg.volume = 0.8;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
         function startEngine() {
             score = 0; time = 0; alive = true; playerY = 0; velocityY = 0; obstacles = []; touchCooldown = false;
             document.getElementById("score").innerHTML = "0"; document.getElementById("time").innerHTML = "0";
@@ -1656,7 +1677,11 @@
 
         window.addEventListener("keydown", e => { if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); } });
         window.addEventListener("touchstart", () => { if (touchCooldown) return; touchCooldown = true; jump(); setTimeout(() => touchCooldown = false, 200); });
-        function jump() { if (!alive || playerY !== 0) return; velocityY = jumpPower; }
+        function jump() { 
+            if (!alive || playerY !== 0) return; 
+            velocityY = jumpPower; 
+            playAnimalSound(myAnimal, "jump");
+        }
 
         function physics() { velocityY -= gravity; playerY += velocityY; if (playerY <= 0) { playerY = 0; velocityY = 0; } }
 
@@ -1761,6 +1786,7 @@
         function gameOver() {
             if (!alive) return;
             alive = false;
+            playAnimalSound(myAnimal, "die");
             clearInterval(gameLoop); clearInterval(obsLoop); clearInterval(timeLoop);
             renderPlayers(); updateMe();
             // Force immediate sync on death
