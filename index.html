@@ -466,7 +466,8 @@
 
         /* HUD */
         .scoreHUD,
-        .timeHUD {
+        .timeHUD,
+        .volumeHUD {
             position: absolute;
             top: 14px;
             width: clamp(90px, 10vw, 130px);
@@ -494,6 +495,20 @@
             color: #00e5ff;
             border-color: #00e5ff;
             box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+        }
+
+        .volumeHUD {
+            right: 14px;
+            top: 226px;
+            color: #ffd700;
+            border-color: #ffd700;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+            height: clamp(50px, 8vw, 70px);
+        }
+        
+        .volumeHUD input {
+            width: 80%;
+            cursor: pointer;
         }
 
         #score,
@@ -1099,6 +1114,10 @@
             <div class="timeHUD">TIME<br>
                 <div id="time">0</div>
             </div>
+            <div class="volumeHUD">
+                <span style="font-size: clamp(12px, 1.5vw, 16px);">🔊 VOL</span>
+                <input type="range" id="bgmVolume" min="0" max="1" step="0.1" value="0.3">
+            </div>
 
             <div id="gameArea">
                 <div class="pixelSky">
@@ -1649,6 +1668,16 @@
         }
 
         let audioCtx;
+        let globalVolume = 0.3;
+
+        // NEW: Volume slider listener
+        const bgmVolumeSlider = document.getElementById('bgmVolume');
+        if (bgmVolumeSlider) {
+            bgmVolumeSlider.addEventListener('input', (e) => {
+                globalVolume = parseFloat(e.target.value);
+            });
+        }
+
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1673,7 +1702,8 @@
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     
-                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    // Multiply base volume by globalVolume slider
+                    gain.gain.setValueAtTime(0.1 * globalVolume, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
                     
                     osc.start(audioCtx.currentTime);
