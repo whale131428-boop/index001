@@ -150,7 +150,7 @@
             left: 0;
             width: 100%;
             height: 45%;
-            background: linear-gradient(180deg, #1565c0 0%, #0d47a1 30%, #062a6e 70%, #031545 100%);
+            background: linear-gradient(180deg, #00b4d8 0%, #0096c7 30%, #0077b6 70%, #023e8a 100%);
         }
 
         /* Pixel wave rows */
@@ -540,7 +540,7 @@
             left: 0;
             width: 100%;
             height: 62%;
-            background: linear-gradient(180deg, #1565c0 0%, #0d47a1 40%, #062a6e 100%);
+            background: linear-gradient(180deg, #00b4d8 0%, #0096c7 40%, #023e8a 100%);
             z-index: 2;
         }
 
@@ -1745,9 +1745,9 @@
             }
             for (let t of obstacles) {
                 if (t.lane !== myLane) continue;
-                if (t.x > 80 && t.x < 170) {
-                    if (t.type === 'tree' && playerY < 50) gameOver();
-                    if (t.type === 'bird' && playerY >= 25) gameOver();
+                if (t.x > 20 && t.x < 85) {
+                    if (t.type === 'tree' && playerY < 40) gameOver();
+                    if (t.type === 'bird' && playerY > 15 && playerY < 110) gameOver();
                 }
             }
         }
